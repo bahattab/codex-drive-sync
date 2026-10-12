@@ -11,6 +11,20 @@ from codex_drive_sync.mcp import serve
 
 
 class InterfaceTests(unittest.TestCase):
+    def test_read_only_engine_reports_pending_journal_without_recovery(self):
+        from codex_drive_sync.engine import Engine
+        from codex_drive_sync.providers import LocalProvider
+        from codex_drive_sync.security import Cipher
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d); project=p/'project'; project.mkdir(); (project/'work.txt').write_text('independent work')
+            provider=LocalProvider(p/'transport'); state=p/'state'
+            first=Engine(state,provider,Cipher(b'x'*32)); first.add_project(project,'demo')
+            (state/'journal.json').write_text('{"unsafe":"would fail recovery"}')
+            read=Engine(state,provider,None,recover_on_init=False)
+            self.assertTrue(read.status()['recovery_pending'])
+            self.assertEqual((project/'work.txt').read_text(),'independent work')
+            self.assertTrue((state/'journal.json').exists())
+
     def test_pair_import_inside_mapped_project_rejected_before_import(self):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d); home=p/'home'; (home/'engine').mkdir(parents=True)

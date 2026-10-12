@@ -8,6 +8,11 @@ for ($check = $destinationFull; $check; $check = Split-Path -Parent $check) {
     if ($check -eq [IO.Path]::GetPathRoot($check)) { break }
 }
 if ((Test-Path -LiteralPath $destinationFull) -and (Get-ChildItem -LiteralPath $destinationFull -Force) -and -not (Test-Path -LiteralPath (Join-Path $destinationFull '.installation-marker'))) { throw 'المجلد غير فارغ ولا يخص تثبيت البرنامج.' }
+if (Test-Path -LiteralPath $destinationFull) {
+    if ((Get-ChildItem -LiteralPath $destinationFull -Recurse -Force | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint })) { throw 'مجلد التثبيت يتضمن رابطًا؛ ألغيت العملية قبل أي كتابة.' }
+    $existingMarker = Join-Path $destinationFull '.installation-marker'
+    if ((Test-Path -LiteralPath $existingMarker) -and (Get-Content -LiteralPath $existingMarker -Raw).Trim() -ne 'codex-drive-sync-install-v1') { throw 'علامة تثبيت غير صالحة.' }
+}
 New-Item -ItemType Directory -Force -Path $destinationFull | Out-Null
 $venv = Join-Path $destinationFull 'venv'
 if (Test-Path -LiteralPath $venv) {
@@ -41,9 +46,10 @@ if (Test-Path -LiteralPath $pluginTarget) {
     if ((Get-ChildItem -LiteralPath $pluginTarget -Recurse -Force | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint })) { throw 'الإضافة تتضمن روابط.' }
 }
 New-Item -ItemType Directory -Force -Path $pluginTarget | Out-Null
-Copy-Item -Path (Join-Path $pluginSource '*') -Destination $pluginTarget -Recurse -Force
-# Copy dot directories explicitly, and bind stdio to the installed interpreter.
-Copy-Item -LiteralPath (Join-Path $pluginSource '.codex-plugin') -Destination $pluginTarget -Recurse -Force
+# Directory mirror without deletion; includes dotfiles and avoids nested rerun copies.
+robocopy $pluginSource $pluginTarget /E /R:1 /W:1 /NFL /NDL /NJH /NJS /NP | Out-Null
+if ($LASTEXITCODE -ge 8) { throw 'تعذر نسخ تعريف الإضافة.' }
+# Bind stdio to the installed interpreter.
 $mcp = @{ mcpServers = @{ 'codex-drive-sync' = @{ command = $python; args = @('-m','codex_drive_sync.cli','mcp') } } }
 $mcp | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $pluginTarget '.mcp.json') -Encoding utf8
 $portable = @{ '$schema' = 'https://agent-plugins.org/schemas/1.0.0/mcp.schema.json'; mcpServers = @{ 'codex-drive-sync' = @{ type='stdio'; command=$python; args=@('-m','codex_drive_sync.cli','mcp') } } }

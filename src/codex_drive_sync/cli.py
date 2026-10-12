@@ -61,7 +61,7 @@ def require_public_root(root,path):
             raise ValueError('المجلد يحتوي ملف اعتماد أو استرداد معروف؛ لا يمكن تمكين نقله.')
 
 
-def build_engine(root):
+def build_engine(root,read_only=False,decrypt=False):
     from .engine import Engine
     from .security import SecretStore, Cipher
     from .providers import LocalProvider, GoogleDriveProvider
@@ -77,7 +77,8 @@ def build_engine(root):
         provider = GoogleDriveProvider(store)
     else:
         raise ValueError('اختر الموفر باستخدام configure؛ ثم راجع sync --dry-run.')
-    return Engine(root / 'engine', provider, Cipher.from_store(store))
+    cipher=Cipher.from_store(store) if not read_only or decrypt else None
+    return Engine(root / 'engine', provider, cipher,recover_on_init=not read_only)
 
 
 def inventory_digest(engine):
@@ -189,7 +190,8 @@ def dispatch(a):
     if a.command=='projects' and a.action=='discover':
         from .discovery import registered_projects
         return registered_projects()
-    engine = build_engine(root)
+    readonly=a.command in ('status','snapshots') or (a.command=='conflicts' and a.action=='list') or (a.command=='projects' and a.action=='list') or getattr(a,'dry_run',False)
+    engine = build_engine(root,read_only=readonly,decrypt=a.command in ('snapshots','sync','restore','handoff'))
     if a.command == 'exclusions': return engine.set_exclusions(a.pattern)
     if a.command == 'projects':
         if a.action == 'list': return engine.inventory()

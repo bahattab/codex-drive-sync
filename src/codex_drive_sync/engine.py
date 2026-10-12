@@ -65,7 +65,7 @@ def _link(path):
 
 
 class Engine:
-    def __init__(self, state_dir, provider, cipher, device_id=None):
+    def __init__(self, state_dir, provider, cipher, device_id=None, recover_on_init=True):
         self.state_dir = Path(state_dir).absolute()
         self.provider, self.cipher = provider, cipher
         transport_root = getattr(provider, "root", None)
@@ -86,8 +86,9 @@ class Engine:
         if not _ID.fullmatch(self.state["device"]):
             raise SyncError("Invalid device id")
         with self._locked():
-            self._recover()
-            self._save()
+            if recover_on_init:
+                self._recover()
+                self._save()
 
     def _read_state(self):
         if self.state_file.exists():

@@ -29,5 +29,6 @@ if (Test-Path -LiteralPath $venv) {
     Remove-Item -LiteralPath $venv -Recurse -Force
 }
 # Leave the configured plugin definition for manual Codex removal, avoiding live app mutation.
-foreach ($name in @('codex-drive-sync.cmd','.installation-marker')) { Remove-Item -LiteralPath (Join-Path $target $name) -Force -ErrorAction SilentlyContinue }
+Remove-Item -LiteralPath (Join-Path $target 'codex-drive-sync.cmd') -Force -ErrorAction SilentlyContinue
+# Preserve ownership marker with retained plugin definitions, enabling safe reinstallation.
 Write-Output 'أزيل البرنامج. بقيت المشاريع واللقطات والنسخ الاحتياطية والمفاتيح المحلية محفوظة.'

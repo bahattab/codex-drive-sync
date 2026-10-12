@@ -17,7 +17,7 @@ def serve(root):
                 result={'tools':[{'name':name,'description':desc,'inputSchema':{'type':'object','properties':{},'additionalProperties':False}} for name,desc in [('sync_status','حالة المزامنة؛ الاستيراد الأصلي معطل'),('sync_inventory','جرد الملفات قبل الرفع'),('sync_conflicts','قائمة التعارضات')]]}
             elif method=='tools/call':
                 name=req.get('params',{}).get('name')
-                engine=build_engine(root)
+                engine=build_engine(root,read_only=True)
                 fn={'sync_status':engine.status,'sync_inventory':engine.inventory,'sync_conflicts':engine.conflicts}.get(name)
                 if fn is None: raise ValueError('Unknown tool')
                 result={'content':[{'type':'text','text':json.dumps(fn(),ensure_ascii=False,default=str)}]}
