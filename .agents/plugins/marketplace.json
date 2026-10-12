@@ -1,0 +1,11 @@
+{
+  "name": "codex-drive-sync-local",
+  "plugins": [
+    {
+      "name": "codex-drive-sync",
+      "source": {"source": "local", "path": "./plugin"},
+      "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+      "category": "Productivity"
+    }
+  ]
+}

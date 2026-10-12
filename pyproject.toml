@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codex-drive-sync"
+version = "0.1.0"
+description = "Encrypted project synchronization and explicit Codex context archives"
+requires-python = ">=3.11"
+dependencies = ["cryptography==46.0.3", "keyring==25.6.0", "requests==2.32.5"]
+
+[project.scripts]
+codex-drive-sync = "codex_drive_sync.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

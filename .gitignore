@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.env*
+client_secret*.json
+credentials*.json
+*.key
+*.log
+.state/
+local-evidence/

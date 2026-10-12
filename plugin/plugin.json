@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "codex-drive-sync",
+  "version": "0.1.0",
+  "description": "مزامنة ملفات مشفرة مع تعارضات صريحة وأرشفة منفصلة؛ نقل محادثات Codex الأصلي غير مثبت."
+}

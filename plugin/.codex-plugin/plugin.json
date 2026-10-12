@@ -1,0 +1,7 @@
+{
+  "name": "codex-drive-sync",
+  "version": "0.1.0",
+  "description": "مزامنة ملفات مشفرة وأرشفة سياق",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}
